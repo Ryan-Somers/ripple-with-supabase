@@ -6,9 +6,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { SmtpMessage } from "../smtp-message";
 
-export default async function Signup(props: {
-  searchParams: Promise<Message>;
-}) {
+export default async function Signup(props: { searchParams: Promise<Message> }) {
   const searchParams = await props.searchParams;
   if ("message" in searchParams) {
     return (
@@ -29,8 +27,15 @@ export default async function Signup(props: {
           </Link>
         </p>
         <div className="flex flex-col gap-2 [&>input]:mb-3 mt-8">
+          <Label htmlFor="full_name">Full Name</Label>
+          <Input name="full_name" placeholder="Your full name" required />
+          
+          <Label htmlFor="bio">Bio</Label>
+          <Input name="bio" placeholder="Tell us about yourself" required />
+          
           <Label htmlFor="email">Email</Label>
-          <Input name="email" placeholder="you@example.com" required />
+          <Input name="email" placeholder="you@example.com" />
+          
           <Label htmlFor="password">Password</Label>
           <Input
             type="password"
@@ -39,13 +44,13 @@ export default async function Signup(props: {
             minLength={6}
             required
           />
+          
           <SubmitButton formAction={signUpAction} pendingText="Signing up...">
             Sign up
           </SubmitButton>
           <FormMessage message={searchParams} />
         </div>
       </form>
-      <SmtpMessage />
     </>
   );
 }

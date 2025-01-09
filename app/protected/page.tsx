@@ -14,25 +14,19 @@ export default async function ProtectedPage() {
     return redirect("/sign-in");
   }
 
+  // Query the 'profiles' table using the user ID
+  const { data: profile, error: profileError } = await supabase
+    .from("profiles")
+    .select("full_name, bio, avatar_url")
+    .eq("id", user.id) 
+    .single(); 
+
   return (
     <div className="flex-1 w-full flex flex-col gap-12">
-      <div className="w-full">
-        <div className="bg-accent text-sm p-3 px-5 rounded-md text-foreground flex gap-3 items-center">
-          <InfoIcon size="16" strokeWidth={2} />
-          This is a protected page that you can only see as an authenticated
-          user
-        </div>
-      </div>
-      <div className="flex flex-col gap-2 items-start">
-        <h2 className="font-bold text-2xl mb-4">Your user details</h2>
-        <pre className="text-xs font-mono p-3 rounded border max-h-32 overflow-auto">
-          {JSON.stringify(user, null, 2)}
-        </pre>
-      </div>
-      <div>
-        <h2 className="font-bold text-2xl mb-4">Next steps</h2>
-        <FetchDataSteps />
-      </div>
+      <h2>You are signed in as {profile?.full_name}</h2>
+      <p>Your bio is: {profile?.bio}</p>
+     
+
     </div>
   );
 }
