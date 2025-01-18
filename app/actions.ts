@@ -8,18 +8,21 @@ import { redirect } from "next/navigation";
 export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
+  const fullName = formData.get("full_name")?.toString(); // Get full name from form
+  const bio = formData.get("bio")?.toString();   
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
-  if (!email || !password) {
+  if (!email || !password || !fullName || !bio) {
     return encodedRedirect(
       "error",
       "/sign-up",
-      "Email and password are required",
+      "Email, password, full name, and bio are required"
     );
   }
 
-  const { error } = await supabase.auth.signUp({
+  // Step 1: Sign up the user using Supabase auth
+  const { data: user, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
@@ -28,15 +31,28 @@ export const signUpAction = async (formData: FormData) => {
   });
 
   if (error) {
-    console.error(error.code + " " + error.message);
     return encodedRedirect("error", "/sign-up", error.message);
-  } else {
-    return encodedRedirect(
-      "success",
-      "/sign-up",
-      "Thanks for signing up! Please check your email for a verification link.",
-    );
   }
+
+  // Step 2: Insert user profile into the 'profiles' table
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .insert({
+      id: user.user?.id,  // Use the user ID from the auth table
+      full_name: fullName, // Insert full name
+      bio: bio,            // Insert bio
+    });
+
+  if (profileError) {
+    return encodedRedirect("error", "/sign-up", profileError.message);
+  }
+
+  // Success message
+  return encodedRedirect(
+    "success",
+    "/sign-up",
+    "Thanks for signing up! Please check your email for a verification link."
+  );
 };
 
 export const signInAction = async (formData: FormData) => {
