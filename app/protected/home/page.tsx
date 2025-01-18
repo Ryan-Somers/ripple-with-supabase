@@ -24,7 +24,7 @@ export default async function HomePage() {
     return (
         <div className="">
             <div>
-                {posts.map(post => (
+                {posts?.map(post => (
                     <SocialCard
                         key={post.id}
                         author={{

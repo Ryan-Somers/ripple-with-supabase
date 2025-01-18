@@ -77,10 +77,10 @@ const config = {
   			},
   			'wave-pulse': {
   				'0%, 100%': {
-  					opacity: 0.4
+  					opacity: "0.4"
   				},
   				'50%': {
-  					opacity: 0.7
+  					opacity: "0.7"
   				}
   			}
   		},
