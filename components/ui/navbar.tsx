@@ -40,8 +40,8 @@ export default function Navbar() {
         </SheetContent>
       </Sheet>
       <Link href="/protected/home" className="mr-6 hidden lg:flex" prefetch={false}>
-        <MountainIcon className="h-6 w-6" />
-        <span className="sr-only">Ripple</span>
+        <MountainIcon className="h-6 w-6 mx-2"/>
+        <span className="font-semibold">Ripple</span>
       </Link>
       <nav className="ml-auto hidden lg:flex gap-6">
         <Link

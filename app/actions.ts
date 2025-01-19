@@ -9,7 +9,8 @@ export const signUpAction = async (formData: FormData) => {
   const email = formData.get("email")?.toString();
   const password = formData.get("password")?.toString();
   const fullName = formData.get("full_name")?.toString(); // Get full name from form
-  const bio = formData.get("bio")?.toString();   
+  const bio = formData.get("bio")?.toString();
+  const avatar = formData.get("avatar") as File | null;
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
 
@@ -34,6 +35,20 @@ export const signUpAction = async (formData: FormData) => {
     return encodedRedirect("error", "/sign-up", error.message);
   }
 
+  // 2. Upload the avatar image if there is one
+  let avatarUrl = null;
+  if (avatar) {
+    const { data, error: uploadError } = await supabase.storage
+        .from("profile-images") // Use your storage bucket name
+        .upload(`avatars/${user?.user?.id}-${avatar.name}`, avatar);
+
+    if (uploadError) {
+      throw new Error(uploadError.message);
+    }
+
+    avatarUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/profile-images/${data?.path}`;
+  }
+
   // Step 2: Insert user profile into the 'profiles' table
   const { error: profileError } = await supabase
     .from("profiles")
@@ -41,6 +56,7 @@ export const signUpAction = async (formData: FormData) => {
       id: user.user?.id,  // Use the user ID from the auth table
       full_name: fullName, // Insert full name
       bio: bio,            // Insert bio
+      avatar_url: avatarUrl
     });
 
   if (profileError) {

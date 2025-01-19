@@ -32,6 +32,16 @@ export default async function Signup(props: { searchParams: Promise<Message> }) 
           
           <Label htmlFor="bio">Bio</Label>
           <Input name="bio" placeholder="Tell us about yourself" required />
+
+          {/* File Upload Input for Profile Image */}
+          <Label htmlFor="avatar">Profile Image</Label>
+          <Input
+              type="file"
+              id="avatar"
+              name="avatar"
+              accept="image/*"
+              required
+          />
           
           <Label htmlFor="email">Email</Label>
           <Input name="email" placeholder="you@example.com" />
