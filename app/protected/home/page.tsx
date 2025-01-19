@@ -1,44 +1,52 @@
-
-import { createClient } from "@/utils/supabase/server";
+// pages/index.tsx
 import { redirect } from "next/navigation";
-import {SocialCard} from "@/components/ui/social-card";
+import { SocialCard } from "@/components/ui/social-card";
 import { formatDistanceToNow } from 'date-fns';
-
+import {fetchAuthenticatedUser, fetchPostsWithProfiles} from "@/utils/queries";
+import {TextareaForm} from "@/components/ui/add-post";  // Import the query function
 
 export default async function HomePage() {
-    const supabase = await createClient();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    const user = await fetchAuthenticatedUser();
 
-  if (!user) {
-    return redirect("/sign-in");
-  }
+    if (!user) {
+        return redirect("/sign-in");
+    }
 
-  const { data: posts, error: postsError } = await supabase
-    .from("posts")
-    .select("id, title, content, author, created_at")
-    .order("created_at", { ascending: false });
+    // Use the reusable query to fetch posts with profiles
+    const postsWithProfiles = await fetchPostsWithProfiles();
 
     return (
-        <div className="">
-            <div>
-                {posts?.map(post => (
+        <div className="grid grid-cols-12 gap-4">
+            <div className="col-span-2">
+            </div>
+            <div className="col-span-8 space-y-8">
+                <h2 className={"font-semibold text-center text-2xl"}>Ripples</h2>
+                <div className="grid w-full gap-2">
+                    <TextareaForm />
+                </div>
+                {postsWithProfiles.map((post) => (
                     <SocialCard
                         key={post.id}
                         author={{
-                            name: post.author.name,
-                            username: post.author.username,
-                            timeAgo: formatDistanceToNow(new Date(post.created_at), { addSuffix: true }),
+                            name: post.profile.full_name,
+                            avatar: post.profile.avatar_url,
+                            timeAgo: formatDistanceToNow(new Date(post.created_at), {addSuffix: true}),
                         }}
                         content={{
                             text: post.content,
                         }}
+                        engagement={{
+                            likes: post.likes || 0,
+                            comments: post.comments || 0,
+                            shares: post.shares || 0,
+                        }}
                     />
                 ))}
             </div>
+
+            <div className="col-span-2">
+            </div>
         </div>
     );
-
 }
