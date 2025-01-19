@@ -18,6 +18,7 @@ export default function Navbar() {
           </Button>
         </SheetTrigger>
         <SheetContent side="left">
+          <ThemeSwitcher  />
           <Link href="/protected/home" className="mr-6 hidden lg:flex" prefetch={false}>
             <MountainIcon className="h-6 w-6" />
             <span className="sr-only">Ripple</span>
