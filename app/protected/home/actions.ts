@@ -3,6 +3,17 @@
 import { createClient } from "@/utils/supabase/server";
 import {revalidatePath} from "next/cache";
 
+interface Comment {
+    id: string;
+    user_id: string;
+    post_id: string;
+    content: string;
+    created_at: string;
+    full_name?: string;  // Assuming these fields might be available
+    avatar_url?: string;
+}
+
+
 // This function will be called when the form is submitted
 export async function addPost(formData: FormData) {
     const supabase = await createClient();
@@ -57,14 +68,15 @@ export async function addComment(formData: FormData, postId: string) {
 
     return { message: "Comment successfully added!", comment: data };
 }
-export async function fetchCommentsByPost(postId: string) {
+export async function fetchCommentsByPost(postId: string): Promise<Comment[]> {
     const supabase = await createClient();
     try {
         // Step 1: Fetch comments related to the post
         const { data: comments, error: commentError } = await supabase
             .from('comments')
-            .select('id, content, created_at, user_id') // user_id references auth.users
-            .eq('post_id', postId);
+            .select('id, content, created_at, user_id, post_id')
+            .eq('post_id', postId)
+            .order('created_at', { ascending: false });
 
         if (commentError) throw new Error(commentError.message);
 

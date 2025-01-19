@@ -74,19 +74,21 @@ export function SocialCard({
     setIsCommentSheetOpen(false); // Close the CommentSheet
   };
 
-  const [isLiked, setIsLiked] = useState(engagement?.isLiked ?? false);
-  const [isBookmarked, setIsBookmarked] = useState(engagement?.isBookmarked ?? false);
-  const [likes, setLikes] = useState(engagement?.likes ?? 0);
+  const [isLiked, setIsLiked] = useState<boolean>(engagement?.isLiked ?? false);
+  const [isBookmarked, setIsBookmarked] = useState<boolean>(engagement?.isBookmarked ?? false);
+  const [likes, setLikes] = useState<number>(engagement?.likes ?? 0);
 
   useEffect(() => {
     const fetchLikes = async () => {
+      if (!postId) return; // Handle case where postId might be undefined
+
       // Fetch likes data including the user's like status
       const { success, likes, isUserLiked, message } = await getLikes(postId);
 
       console.log("Likes:", likes);
       if (success) {
-        setLikes(likes);
-        setIsLiked(isUserLiked); // Set like status for the authenticated user
+        setLikes(likes ?? 0); // Ensure likes is a number (fallback to 0 if undefined)
+        setIsLiked(isUserLiked ?? false); // Ensure isUserLiked is a boolean (fallback to false if undefined)
       } else {
         console.error(message);
       }
@@ -101,7 +103,7 @@ export function SocialCard({
     setLikes(prev => newIsLiked ? prev + 1 : prev - 1);
 
     try {
-      const { success, message } = await addLike(postId, author?.id, newIsLiked);
+      const { success, message } = await addLike(postId ?? "", author?.id ?? "", newIsLiked);
       if (!success) {
         throw new Error(message);
       }
@@ -112,9 +114,6 @@ export function SocialCard({
 
     onLike?.(); // Optional: Trigger the callback if provided
   };
-
-
-
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked);
@@ -225,7 +224,7 @@ export function SocialCard({
 
               {/* CommentSheet (conditional rendering) */}
               <CommentSheet
-                  postId={postId}
+                  postId={postId ?? ""}
                   isOpen={isCommentSheetOpen}
                   onClose={closeCommentSheet}
               />

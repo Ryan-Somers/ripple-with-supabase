@@ -20,9 +20,20 @@ interface CommentSheetProps {
     onClose: () => void; // Function to close the comment sheet
 }
 
+interface Comment {
+    id: string;
+    user_id: string;
+    post_id: string;
+    content: string;
+    created_at: string;
+    full_name?: string;  // Assuming these fields might be available
+    avatar_url?: string;
+}
+
+
 export function CommentSheet({ postId, isOpen, onClose }: CommentSheetProps) {
     const [newComment, setNewComment] = useState('');
-    const [comments, setComments] = useState([]); // Store fetched comments
+    const [comments, setComments] = useState<Comment[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
     // Fetch comments when the postId or isOpen changes
