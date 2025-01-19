@@ -14,7 +14,13 @@ import {
 import { addComment } from '@/app/protected/home/actions';
 import { fetchCommentsByPost } from "@/app/protected/home/actions";
 
-export function CommentSheet({ postId, isOpen, onClose }) {
+interface CommentSheetProps {
+    postId: string;  // Assuming postId is a string, adjust if needed
+    isOpen: boolean; // Boolean to track if the comment sheet is open
+    onClose: () => void; // Function to close the comment sheet
+}
+
+export function CommentSheet({ postId, isOpen, onClose }: CommentSheetProps) {
     const [newComment, setNewComment] = useState('');
     const [comments, setComments] = useState([]); // Store fetched comments
     const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +31,6 @@ export function CommentSheet({ postId, isOpen, onClose }) {
             if (isOpen && postId) {
                 try {
                     const fetchedComments = await fetchCommentsByPost(postId);
-                    console.log("Fetched comments:", fetchedComments);
                     setComments(fetchedComments); // Set the fetched comments
                 } catch (error) {
                     console.error("Error fetching comments:", error);
