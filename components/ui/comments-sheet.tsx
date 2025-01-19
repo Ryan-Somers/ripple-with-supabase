@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import {useEffect, useRef, useState} from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea'; // Assuming ShadCN UI includes Textarea component
 import {
@@ -33,9 +33,16 @@ interface Comment {
 
 export function CommentSheet({ postId, isOpen, onClose }: CommentSheetProps) {
     const [newComment, setNewComment] = useState('');
+    const textareaRef = useRef<HTMLTextAreaElement | null>(null);
     const [comments, setComments] = useState<Comment[]>([]);
     const [isLoading, setIsLoading] = useState(true);
 
+    const handleTextareaClick = () => {
+        // Focus the textarea manually when the user clicks it
+        if (textareaRef.current) {
+            textareaRef.current.focus();
+        }
+    };
     // Fetch comments when the postId or isOpen changes
     useEffect(() => {
         const loadComments = async () => {
@@ -112,8 +119,10 @@ export function CommentSheet({ postId, isOpen, onClose }: CommentSheetProps) {
                 <div className="grid gap-4 py-4">
                     <Textarea
                         value={newComment}
+                        ref={textareaRef} // Attach the ref to the textarea/input
                         onChange={(e) => setNewComment(e.target.value)}
                         placeholder="Add a comment..."
+                        onClick={handleTextareaClick}
                         rows={3}
                         className="w-full"
                     />
