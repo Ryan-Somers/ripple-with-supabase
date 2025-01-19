@@ -24,11 +24,10 @@ export default async function ProfilePage() {
         return redirect("/sign-in");
     }
 
-
-
     return (
         <div className="flex-1 w-full flex flex-col gap-12">
             <h2 className={"font-semibold text-2xl"}>Hello, {user.full_name}</h2>
+            <img src={user.avatar_url} alt="Profile picture" className="rounded-full w-32 h-32"/>
             <p className={"text-muted-foreground"}>Here's your profile information:</p>
             <div className="flex flex-col gap-4">
                 <div className="flex flex-col gap-1">

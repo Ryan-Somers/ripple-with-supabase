@@ -9,10 +9,15 @@ import {
   MoreHorizontal,
   Link as LinkIcon,
 } from "lucide-react";
-import { useState } from "react";
+import {useEffect, useState} from "react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "./dropdown-menu";
+import { CommentSheet } from '@/components/ui/comments-sheet'; // Import the CommentSheet component
+import {addLike, getLikes} from "@/app/protected/home/actions"; // Import the addLike function
+
 
 interface SocialCardProps {
   author?: {
+    id?: string;
     name?: string;
     username?: string;
     avatar?: string;
@@ -39,9 +44,12 @@ interface SocialCardProps {
   onBookmark?: () => void;
   onMore?: () => void;
   className?: string;
+  authenticationUserId?: string,
+  postId?: string,
 }
 
 export function SocialCard({
+  authenticationUserId,
   author,
   content,
   engagement,
@@ -49,18 +57,64 @@ export function SocialCard({
   onComment,
   onShare,
   onBookmark,
-  onMore,
+  onMore, postId,
   className
 }: SocialCardProps) {
+
+  // Check if the authenticated user matches the post author
+  const isAuthenticatedUser = authenticationUserId === author?.id;
+
+  const [isCommentSheetOpen, setIsCommentSheetOpen] = useState(false);
+
+  const handleCommentButtonClick = () => {
+    setIsCommentSheetOpen(true); // Open the CommentSheet
+  };
+
+  const closeCommentSheet = () => {
+    setIsCommentSheetOpen(false); // Close the CommentSheet
+  };
+
   const [isLiked, setIsLiked] = useState(engagement?.isLiked ?? false);
   const [isBookmarked, setIsBookmarked] = useState(engagement?.isBookmarked ?? false);
   const [likes, setLikes] = useState(engagement?.likes ?? 0);
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikes(prev => isLiked ? prev - 1 : prev + 1);
-    onLike?.();
+  useEffect(() => {
+    const fetchLikes = async () => {
+      // Fetch likes data including the user's like status
+      const { success, likes, isUserLiked, message } = await getLikes(postId);
+
+      console.log("Likes:", likes);
+      if (success) {
+        setLikes(likes);
+        setIsLiked(isUserLiked); // Set like status for the authenticated user
+      } else {
+        console.error(message);
+      }
+    };
+
+    fetchLikes();
+  }, [postId]);
+
+  const handleLike = async () => {
+    const newIsLiked = !isLiked;
+    setIsLiked(newIsLiked);
+    setLikes(prev => newIsLiked ? prev + 1 : prev - 1);
+
+    try {
+      const { success, message } = await addLike(postId, author?.id, newIsLiked);
+      if (!success) {
+        throw new Error(message);
+      }
+      console.log(message);
+    } catch (error) {
+      console.error('Error while updating like:', error);
+    }
+
+    onLike?.(); // Optional: Trigger the callback if provided
   };
+
+
+
 
   const handleBookmark = () => {
     setIsBookmarked(!isBookmarked);
@@ -96,13 +150,20 @@ export function SocialCard({
                 </p>
               </div>
             </div>
-            <button
-              type="button"
-              onClick={onMore}
-              className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
-            >
-              <MoreHorizontal className="w-5 h-5 text-zinc-400" />
-            </button>
+            {/* Only render the "More" button if the authenticated user is the post author */}
+            {isAuthenticatedUser && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <button className="p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full">
+                      <MoreHorizontal className="w-5 h-5 text-zinc-400" />
+                    </button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>Edit Post</DropdownMenuItem>
+                    <DropdownMenuItem>Delete Post</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+            )}
           </div>
 
           {/* Content section */}
@@ -152,14 +213,22 @@ export function SocialCard({
                 />
                 <span>{likes}</span>
               </button>
+              {/* Comment button */}
               <button
-                type="button"
-                onClick={onComment}
-                className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400 hover:text-blue-500 transition-colors"
+                  type="button"
+                  onClick={handleCommentButtonClick}
+                  className="flex items-center gap-2 text-sm text-zinc-500 dark:text-zinc-400 hover:text-blue-500 transition-colors"
               >
                 <MessageCircle className="w-5 h-5" />
                 <span>{engagement?.comments}</span>
               </button>
+
+              {/* CommentSheet (conditional rendering) */}
+              <CommentSheet
+                  postId={postId}
+                  isOpen={isCommentSheetOpen}
+                  onClose={closeCommentSheet}
+              />
               <button
                 type="button"
                 onClick={onShare}

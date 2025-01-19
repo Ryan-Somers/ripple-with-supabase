@@ -3,7 +3,8 @@ import { redirect } from "next/navigation";
 import { SocialCard } from "@/components/ui/social-card";
 import { formatDistanceToNow } from 'date-fns';
 import {fetchAuthenticatedUser, fetchPostsWithProfiles} from "@/utils/queries";
-import {TextareaForm} from "@/components/ui/add-post";  // Import the query function
+import {TextareaForm} from "@/components/ui/add-post";
+import {fetchCommentCountByPost} from "@/app/protected/home/actions";  // Import the query function
 
 export default async function HomePage() {
 
@@ -16,6 +17,15 @@ export default async function HomePage() {
     // Use the reusable query to fetch posts with profiles
     const postsWithProfiles = await fetchPostsWithProfiles();
 
+    // Fetch comment count for each post
+    const postsWithCommentCounts = await Promise.all(postsWithProfiles.map(async (post) => {
+        const commentCount = await fetchCommentCountByPost(post.id);
+        return {
+            ...post,
+            commentCount,  // Add the comment count to the post
+        };
+    }));
+
     return (
         <div className="grid grid-cols-12 gap-4">
             <div className="col-span-2">
@@ -25,20 +35,23 @@ export default async function HomePage() {
                 <div className="grid w-full gap-2">
                     <TextareaForm />
                 </div>
-                {postsWithProfiles.map((post) => (
+                {postsWithCommentCounts.map((post) => (
                     <SocialCard
                         key={post.id}
+                        postId={post.id}
+                        authenticationUserId={post.user_id}
                         author={{
+                            id: user.id,  // Post author ID
                             name: post.profile.full_name,
                             avatar: post.profile.avatar_url,
-                            timeAgo: formatDistanceToNow(new Date(post.created_at), {addSuffix: true}),
+                            timeAgo: formatDistanceToNow(new Date(post.created_at), { addSuffix: true }),
                         }}
                         content={{
                             text: post.content,
                         }}
                         engagement={{
                             likes: post.likes || 0,
-                            comments: post.comments || 0,
+                            comments: post.commentCount, // Use the comment count here
                             shares: post.shares || 0,
                         }}
                     />
