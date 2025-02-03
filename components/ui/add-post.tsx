@@ -61,13 +61,13 @@ export function TextareaForm() {
                                 />
                             </FormControl>
                             <FormDescription>
-                                You can <span>@mention</span> other users and organizations.
+                                Keep it short and sweet.
                             </FormDescription>
                             <FormMessage />
                         </FormItem>
                     )}
                 />
-                <Button type="submit">Submit</Button>
+                <Button type="submit">Post</Button>
             </form>
         </Form>
     );

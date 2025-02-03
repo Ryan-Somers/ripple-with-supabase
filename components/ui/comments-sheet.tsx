@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/sheet';
 import { addComment } from '@/app/protected/home/actions';
 import { fetchCommentsByPost } from "@/app/protected/home/actions";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface CommentSheetProps {
     postId: string;  // Assuming postId is a string, adjust if needed
@@ -81,12 +82,22 @@ export function CommentSheet({ postId, isOpen, onClose }: CommentSheetProps) {
 
 
 
+    const CommentSkeleton = () => (
+        <div className="flex items-center gap-2 mb-4">
+            <Skeleton className="h-8 w-8 rounded-full" />
+            <div className="space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-48" />
+            </div>
+        </div>
+    );
+
     return (
         <Sheet open={isOpen} onOpenChange={onClose}>
             <SheetTrigger asChild>
                 {/* You can trigger the sheet with any button or action */}
             </SheetTrigger>
-            <SheetContent side={"bottom"}>
+            <SheetContent side={"bottom"} >
                 <SheetHeader>
                     <SheetTitle>Comments</SheetTitle>
                     <SheetDescription>
@@ -94,8 +105,14 @@ export function CommentSheet({ postId, isOpen, onClose }: CommentSheetProps) {
                     </SheetDescription>
                 </SheetHeader>
 
-                <div className="overflow-y-scroll max-h-[300px]">
-                    {comments.length === 0 ? (
+                <div className="overflow-y-scroll max-h-[300px] my-3">
+                    {isLoading ? (
+                        <>
+                            <CommentSkeleton />
+                            <CommentSkeleton />
+                            <CommentSkeleton />
+                        </>
+                    ) : comments.length === 0 ? (
                         <p>No comments yet. Be the first to comment!</p>
                     ) : (
                         comments.map((comment) => (
@@ -103,7 +120,7 @@ export function CommentSheet({ postId, isOpen, onClose }: CommentSheetProps) {
                                 <img
                                     src={comment.avatar_url}
                                     alt="User avatar"
-                                    className="w-8 h-8 rounded-full"
+                                    className="w-8 h-8 rounded-full object-cover"
                                 />
                                 <div>
                                     <p className="font-semibold">{comment.full_name || 'Unknown User'}</p>

@@ -160,8 +160,8 @@ export async function addLike(postId: string, userId: string, isLiked: boolean) 
 }
 
 export async function getLikes(postId: string) {
-    const supabase = await createClient(); // Initialize Supabase client
-    const user = await supabase.auth.getUser(); // Get the current authenticated user
+    const supabase = await createClient();
+    const user = await supabase.auth.getUser();
 
     if (!user) {
         return { success: false, message: 'User not authenticated' };
@@ -171,7 +171,7 @@ export async function getLikes(postId: string) {
         // Query to count likes for the post
         const { data, error, count } = await supabase
             .from('likes')
-            .select('*', { count: 'exact' }) // Use '*' to count all rows
+            .select('*', { count: 'exact' })
             .eq('post_id', postId);
 
         if (error) throw error;
@@ -180,7 +180,6 @@ export async function getLikes(postId: string) {
 
         console.log('Data:', data, 'Count:', count);
 
-        // Return both the likes count and user like status
         return {
             success: true,
             likes: count ?? 0,
@@ -189,6 +188,23 @@ export async function getLikes(postId: string) {
     } catch (error) {
         console.error('Error while fetching likes:', error);
         return { success: false, message: 'Failed to fetch likes' };
+    }
+}
+
+export async function deletePost(postId: string) {
+    const supabase = await createClient();
+    try {
+        const { error } = await supabase
+            .from('posts')
+            .delete()
+            .eq('id', postId);
+
+        if (error) throw error;
+
+        return { success: true, message: 'Post deleted successfully' };
+    } catch (error) {
+        console.error('Error deleting post:', error);
+        return { success: false, message: 'Failed to delete post' };
     }
 }
 

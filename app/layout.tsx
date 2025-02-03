@@ -1,15 +1,11 @@
-import DeployButton from "@/components/deploy-button";
-import { EnvVarWarning } from "@/components/env-var-warning";
-import HeaderAuth from "@/components/header-auth";
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { hasEnvVars } from "@/utils/supabase/check-env-vars";
+
 import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
-import Link from "next/link";
 import { Toaster } from "@/components/ui/sonner";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import "./globals.css";
 import Navbar from "@/components/ui/navbar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar"
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
@@ -40,12 +36,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+           <SidebarProvider>
+            <AppSidebar />
           <main className="min-h-screen flex flex-col items-center">
             <div className="flex-1 w-full flex flex-col gap-20 items-center">
-            <nav className="w-full flex justify-center border-b border-b-foreground/10 ">
-                <Navbar />
-              </nav>
               <div className="flex flex-col gap-20 max-w-5xl p-5">
+              <SidebarTrigger />
                 {children}
                 <Toaster richColors position={"top-center"} />
               </div>
@@ -65,6 +61,7 @@ export default function RootLayout({
               </footer>
             </div>
           </main>
+          </SidebarProvider>
         </ThemeProvider>
       </body>
     </html>

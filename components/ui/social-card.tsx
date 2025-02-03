@@ -13,6 +13,7 @@ import {useEffect, useState} from "react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "./dropdown-menu";
 import { CommentSheet } from '@/components/ui/comments-sheet'; // Import the CommentSheet component
 import {addLike, getLikes} from "@/app/protected/home/actions"; // Import the addLike function
+import { DeleteModal} from "@/components/ui/delete-modal";
 
 
 interface SocialCardProps {
@@ -63,8 +64,16 @@ export function SocialCard({
 
   // Check if the authenticated user matches the post author
   const isAuthenticatedUser = authenticationUserId === author?.id;
-
   const [isCommentSheetOpen, setIsCommentSheetOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const openModel = () => {
+    setIsDeleteModalOpen(true);
+  }
+
+    const closeModel = () => {
+        setIsDeleteModalOpen(false);
+    }
 
   const handleCommentButtonClick = () => {
     setIsCommentSheetOpen(true); // Open the CommentSheet
@@ -85,7 +94,6 @@ export function SocialCard({
       // Fetch likes data including the user's like status
       const { success, likes, isUserLiked, message } = await getLikes(postId);
 
-      console.log("Likes:", likes);
       if (success) {
         setLikes(likes ?? 0); // Ensure likes is a number (fallback to 0 if undefined)
         setIsLiked(isUserLiked ?? false); // Ensure isUserLiked is a boolean (fallback to false if undefined)
@@ -112,7 +120,7 @@ export function SocialCard({
       console.error('Error while updating like:', error);
     }
 
-    onLike?.(); // Optional: Trigger the callback if provided
+    onLike?.();
   };
 
   const handleBookmark = () => {
@@ -138,7 +146,7 @@ export function SocialCard({
               <img
                 src={author?.avatar}
                 alt={author?.name}
-                className="w-10 h-10 rounded-full ring-2 ring-white dark:ring-zinc-800"
+                className="w-10 h-10 object-cover rounded-full ring-2 ring-white dark:ring-zinc-800"
               />
               <div>
                 <h3 className="text-sm font-medium text-zinc-900 dark:text-zinc-100">
@@ -158,12 +166,18 @@ export function SocialCard({
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>Edit Post</DropdownMenuItem>
+                    <DropdownMenuItem onClick={openModel}>Edit Post</DropdownMenuItem>
                     <DropdownMenuItem>Delete Post</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
             )}
           </div>
+
+            {/* Delete modal */}
+          {isDeleteModalOpen && (
+                <DeleteModal
+                />
+          )}
 
           {/* Content section */}
           <p className="text-zinc-600 dark:text-zinc-300 mb-4">
